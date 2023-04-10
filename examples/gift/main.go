@@ -9,35 +9,53 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/generator"
 )
 
+var geoData = `
+- name: Москва
+  statements:
+    - город
+    - река
+    - столица
+    - столица России
+    - город в России
+- name: Берлин
+  statements:
+    - город
+    - город в Германии
+    - столица
+    - столица Германии
+- name: Россия
+  statements:
+    - страна
+- name: Лена
+  statements:
+    - река
+- name: Волга
+  statements:
+    - река
+- name: Волгоград
+  statements:
+    - город
+    - город в России
+`
+
 func main() {
-	g := generator.NewGenerator(nil)
+	var facts fact.Facts
 
-	g.AddFact(fact.NewFact("Москва", fact.Statements{
-		fact.NewStatement("Город"),
-		fact.NewStatement("Столица"),
-	}))
+	// Разбираем факты
+	facts.Parse([]byte(geoData))
 
-	g.AddFact(fact.NewFact("Берлин", fact.Statements{
-		fact.NewStatement("Город"),
-		fact.NewStatement("Столица"),
-	}))
+	// Создаем генератор карточек вопросов
+	g := generator.NewGenerator(generator.DefaultParameters)
 
-	g.AddFact(fact.NewFact("Волгоград", fact.Statements{
-		fact.NewStatement("Город"),
-	}))
+	// Добавляем факты в генератор
+	g.AddFacts(facts)
 
-	g.AddFact(fact.NewFact("Россия", fact.Statements{
-		fact.NewStatement("Страна"),
-	}))
-
-	g.AddFact(fact.NewFact("Германия", fact.Statements{
-		fact.NewStatement("Страна"),
-	}))
-
+	// Создаем карточки вопросов
 	if err := g.CreateCards(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("%v", err)
 	}
 
+	// Выводим результат в формате GIFT
 	if err := gift.NewEncoder(os.Stdout).Encode(g.Cards()); err != nil {
 		log.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/card"
 )
 
-const defaultCardsMax = 10
+const defaultCardsMax = 40
 
 type Parameters struct {
 	// Типы карточек с вопросами
@@ -16,6 +16,8 @@ type Parameters struct {
 	// Параметры генерации карточки вопроса
 	card *card.Parameters
 }
+
+var DefaultParameters = NewParameters() // Параметры по умолчанию
 
 func NewParameters() *Parameters {
 	p := &Parameters{

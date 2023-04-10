@@ -18,6 +18,7 @@ type Option interface {
 	Symbol() rune
 }
 
+// Интерфейс менеджера вариантов ответов
 type OptionsManager interface {
 	Options() Options
 	AddOption(Option)
@@ -35,6 +36,9 @@ type option struct {
 	correct bool
 }
 
+/*
+Создает новый объект варианта ответа в карточке вопроса
+*/
 func NewOption(descr string, correct bool) Option {
 	option := &option{
 		description: descr,
@@ -64,10 +68,16 @@ func (o *option) Symbol() rune {
 	return o.symbol
 }
 
+/*
+Устанавливает признак правильного ответа
+*/
 func (o *option) SetCorrect(ca bool) {
 	o.correct = ca
 }
 
+/*
+Возвращает признак правильного ответа
+*/
 func (o *option) Correct() bool {
 	return o.correct
 }

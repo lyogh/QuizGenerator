@@ -57,13 +57,6 @@ type Card interface {
 	GenerateOptionsByFacts(facts fact.Facts, distractors fact.Facts, params Parameters) error
 }
 
-func aikenParameters() *Parameters {
-	p := NewParameters()
-	p.answers.max = 1
-
-	return p
-}
-
 func NewCard(question string, ctype CardType) (Card, error) {
 	card := card{
 		question: question,
@@ -176,19 +169,17 @@ func (c *card) addOptionsMix() {
 
 	answers := c.Answers()
 
-	if len(options) == len(answers) {
+	if slices.CompareFunc(options, answers, func(o1 option.Option, o2 option.Option) int { return int(o1.Id() - o2.Id()) }) == 0 {
 		correct = true
-	}
 
-	if len(options) == len(c.options) {
-		all = true
-	}
-
-	if correct {
 		// т.к. добавленный вариант покрывает все правильные ответы, то у других вариантов убираем признак верного ответа
 		for _, a := range answers {
 			a.SetCorrect(false)
 		}
+	}
+
+	if len(options) == len(c.options) {
+		all = true
 	}
 
 	c.options = append(c.options, option.NewMixedOption(options, correct, all))
@@ -266,7 +257,7 @@ func (c *card) CardType() CardType {
 Возвращает правильные ответы
 */
 func (c *card) Answers() option.Options {
-	options := make(option.Options, len(c.options)-1)
+	options := make(option.Options, len(c.options))
 
 	i := 0
 	for _, o := range c.options {
@@ -276,5 +267,5 @@ func (c *card) Answers() option.Options {
 		}
 	}
 
-	return options
+	return options[:i]
 }

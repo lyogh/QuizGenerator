@@ -4,10 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
+	"strings"
 
 	"github.com/lyogh/QuizGenerator/pkg/card"
 	"github.com/lyogh/QuizGenerator/pkg/encoding"
 )
+
+var escapeRegexp = regexp.MustCompile(`([~=#{}:])`)
 
 type encoder struct {
 	writer *bufio.Writer
@@ -34,25 +38,61 @@ func (e *encoder) Encode(cards card.Cards) error {
 func (e *encoder) encodeCard(c card.Card) error {
 	switch c.CardType() {
 	case card.TypeTrueFalse:
-		e.encodeTrueFalseCard(c)
+		e.encodeTrueFalse(c)
 	case card.TypeMultipleChoice:
+		e.encodeMultipleChoice(c)
 	}
 
 	return nil
 }
 
-func (e *encoder) encodeTrueFalseCard(c card.Card) {
-	const (
-		trueAnswer  = "{T}"
-		falseAnswer = "{F}"
-	)
-
+/*
+Преобразует данные каточки True/False
+*/
+func (e *encoder) encodeTrueFalse(c card.Card) {
 	ao := c.Answers()[0]
-	a := falseAnswer
+	a := "{F}"
 
 	if ao.String() == card.AnswerYes {
-		a = trueAnswer
+		a = "{T}"
 	}
 
-	e.writer.WriteString(fmt.Sprintf("%s%s", c.Question(), a))
+	e.writer.WriteString(fmt.Sprintf("%s%s", e.escapeString(c.Question()), a))
+}
+
+// Преобразует данные карточки множественного выбора
+func (e *encoder) encodeMultipleChoice(c card.Card) {
+	const wrong = "~"
+
+	var b strings.Builder
+
+	ac := len(c.Answers())
+
+	for _, o := range c.Options() {
+		b.WriteString("\n")
+
+		if o.Correct() {
+			if ac > 1 {
+				b.WriteString(fmt.Sprintf("%s%%%f%%", wrong, 1/float32(ac)*100))
+			} else {
+				b.WriteString("=")
+			}
+		} else {
+			b.WriteString(wrong)
+
+			if ac > 1 {
+				b.WriteString("%-100%")
+			}
+		}
+
+		b.WriteRune(o.Symbol())
+		b.WriteString(". ")
+		b.WriteString(e.escapeString(o.String()))
+	}
+
+	e.writer.WriteString(fmt.Sprintf("%s {%s\n}", e.escapeString(c.Question()), b.String()))
+}
+
+func (e *encoder) escapeString(s string) string {
+	return string(escapeRegexp.ReplaceAll([]byte(s), []byte(`\$1`)))
 }

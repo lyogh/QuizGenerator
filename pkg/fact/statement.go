@@ -5,6 +5,9 @@ type (
 	Statements []*Statement
 )
 
+/*
+Создает новый объект - утверждение
+*/
 func NewStatement(stm string) *Statement {
 	s := new(Statement)
 

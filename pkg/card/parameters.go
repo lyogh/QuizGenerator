@@ -14,14 +14,25 @@ type Parameters struct {
 	answers *Interval
 }
 
-// Параметры карточки вопроса для последующего экспорта в формат Aiken
-var AikenParameters = aikenParameters()
+var (
+	DefaultParameters = NewParameters()   // Параметры по умолчанию
+	AikenParameters   = aikenParameters() // Параметры карточки вопроса для последующего экспорта в формат Aiken
+)
 
 func NewParameters() *Parameters {
 	p := &Parameters{
 		options: NewInterval(MinOptions, ^uint(0)),
 		answers: NewInterval(MinAnswers, ^uint(0)),
 	}
+
+	return p
+}
+
+func aikenParameters() *Parameters {
+	p := NewParameters()
+
+	p.options.max = 10
+	p.answers.max = 1
 
 	return p
 }

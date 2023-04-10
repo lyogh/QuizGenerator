@@ -8,6 +8,9 @@ type multipleChoiceCard struct {
 	generator
 }
 
+/*
+Создает новый объект генератора карточек множественного выбора
+*/
 func NewMultipleChoiceCard(parameters *Parameters) Generator {
 	p := *parameters
 

@@ -9,6 +9,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Генератор карточек вопросов
 type Generator interface {
 	CreateCards() error
 
@@ -21,6 +22,7 @@ type Generator interface {
 	Cards() card.Cards
 }
 
+// Генератор карточек вопросов
 type generator struct {
 	// Карточки теста
 	cards card.Cards
@@ -32,6 +34,9 @@ type generator struct {
 	parameters *Parameters
 }
 
+/*
+Создает новый объект генератора карточек вопросов
+*/
 func NewGenerator(params *Parameters) Generator {
 	g := &generator{
 		parameters: params,
@@ -44,26 +49,41 @@ func NewGenerator(params *Parameters) Generator {
 	return g
 }
 
+/*
+Добавляет факт в генератор
+*/
 func (g *generator) AddFact(fact *fact.Fact) {
 	g.facts = append(g.facts, fact)
 }
 
+/*
+Добавляет факты в генератор
+*/
 func (g *generator) AddFacts(facts fact.Facts) {
 	for _, f := range facts {
 		g.AddFact(f)
 	}
 }
 
+/*
+Добавляет дистрактор в генератор
+*/
 func (g *generator) AddDistractor(distractor *fact.Fact) {
 	g.distractors = append(g.distractors, distractor)
 }
 
+/*
+Добавляет дистракторы в генератор
+*/
 func (g *generator) AddDistractors(distractors fact.Facts) {
 	for _, d := range distractors {
 		g.AddDistractor(d)
 	}
 }
 
+/*
+Возвращает созданные карточки вопросов
+*/
 func (g *generator) Cards() card.Cards {
 	return g.cards
 }
@@ -97,6 +117,9 @@ func (g *generator) createDistractors() {
 	}
 }
 
+/*
+Создает карточки вопросов
+*/
 func (g *generator) CreateCards() error {
 	var (
 		wg sync.WaitGroup
@@ -148,6 +171,9 @@ func (g *generator) CreateCards() error {
 	return nil
 }
 
+/*
+Перемешивает карточки вопросов
+*/
 func (g *generator) Shuffle() {
 	g.cards.Shuffle()
 

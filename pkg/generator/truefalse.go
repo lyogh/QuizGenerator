@@ -12,6 +12,9 @@ type trueFalseGenerator struct {
 	generator
 }
 
+/*
+Создает новый объект генератора карточек вопросов True/False
+*/
 func NewTrueFalseGenerator(params *Parameters) Generator {
 	p := *params
 
