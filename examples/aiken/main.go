@@ -10,30 +10,61 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/generator"
 )
 
+/*
 var abap = `
-- name: The Object Navigator
+  - name: The Object Navigator
+    statements:
+  - incorporates a total of 11 browsers
+  - can display and edit ABAP programs
+  - can display and edit screens
+  - can display and edit menus
+  - can maintain ABAP Dictionary
+  - name: The Repository Browser
+    statements:
+  - is started by default when you execute Transaction SE80 for the Object Navigator
+  - name: The Repository Information System
+    statements:
+  - is a useful tool to search for customer exits/function exits and BAdIs in the SAP system
+  - name: Enhancement Information System
+    statements:
+  - can display Enhancement definitions and implementations
+  - name: Customer repository object
+    statements:
+  - have to be assigned to a package
+  - name: Package
+    statements:
+  - use interfaces and visibility to make their elements visible to other packages
+  - can be nested
+
+`
+*/
+var abap = `
+- name: Москва
   statements:
-    - incorporates a total of 11 browsers
-    - can display and edit ABAP programs
-    - can display and edit screens
-    - can display and edit menus
-    - can maintain ABAP Dictionary
-- name: The Repository Browser
+    - город
+    - река
+    - столица
+    - столица России
+    - город в России
+- name: Берлин
   statements:
-    - is started by default when you execute Transaction SE80 for the Object Navigator
-- name: The Repository Information System
+    - город
+    - город в Германии
+    - столица
+    - столица Германии
+- name: Россия
   statements:
-    - is a useful tool to search for customer exits/function exits and BAdIs in the SAP system
-- name: Enhancement Information System
+    - страна
+- name: Лена
   statements:
-    - can display Enhancement definitions and implementations 
-- name: Customer repository object
+    - река
+- name: Волга
   statements:
-    - have to be assigned to a package
-- name: Package
+    - река
+- name: Волгоград
   statements:
-    - use interfaces and visibility to make their elements visible to other packages
-    - can be nested
+    - город
+    - город в России
 `
 
 func main() {
