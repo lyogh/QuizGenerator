@@ -10,7 +10,6 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/generator"
 )
 
-/*
 var abap = `
   - name: The Object Navigator
     statements:
@@ -35,36 +34,6 @@ var abap = `
     statements:
   - use interfaces and visibility to make their elements visible to other packages
   - can be nested
-
-`
-*/
-var abap = `
-- name: Москва
-  statements:
-    - город
-    - река
-    - столица
-    - столица России
-    - город в России
-- name: Берлин
-  statements:
-    - город
-    - город в Германии
-    - столица
-    - столица Германии
-- name: Россия
-  statements:
-    - страна
-- name: Лена
-  statements:
-    - река
-- name: Волга
-  statements:
-    - река
-- name: Волгоград
-  statements:
-    - город
-    - город в России
 `
 
 func main() {
