@@ -69,8 +69,12 @@ ANSWER: B
 
 ### Режим тестирования
 Запуск тестирования по фактам описанным в файле `data.yaml`: 
-`QuizGen.exe data.yaml`
+```
+QuizGen.exe data.yaml
+```
 
 ### Режим выгрузки
 Выгрузка вопросов теста по фактам описанным в файле `data.yaml` в файл формата GIFT с названием `out.txt`: 
-`QuizGen.exe -f gift data.yaml out.txt`
+```
+QuizGen.exe -f gift data.yaml out.txt
+```
