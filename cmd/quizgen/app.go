@@ -116,6 +116,18 @@ func (a *app) test() error {
 
 	result = result / float32(len(a.g.Cards()))
 
-	fmt.Printf("Общий результат: %.2f%%", result*100)
+	color := ColorIncomplete
+
+	switch result {
+	case 0:
+		color = ColorNegative
+	case 1:
+		color = ColorPositive
+	}
+
+	fmt.Print("\n")
+	t.print(color, fmt.Sprintf("Общий результат: %.2f%%", result*100))
+	fmt.Print("\n")
+
 	return nil
 }
