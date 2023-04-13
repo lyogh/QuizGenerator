@@ -10,37 +10,41 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/generator"
 )
 
-var abap = `
-  - name: The Object Navigator
-    statements:
-  - incorporates a total of 11 browsers
-  - can display and edit ABAP programs
-  - can display and edit screens
-  - can display and edit menus
-  - can maintain ABAP Dictionary
-  - name: The Repository Browser
-    statements:
-  - is started by default when you execute Transaction SE80 for the Object Navigator
-  - name: The Repository Information System
-    statements:
-  - is a useful tool to search for customer exits/function exits and BAdIs in the SAP system
-  - name: Enhancement Information System
-    statements:
-  - can display Enhancement definitions and implementations
-  - name: Customer repository object
-    statements:
-  - have to be assigned to a package
-  - name: Package
-    statements:
-  - use interfaces and visibility to make their elements visible to other packages
-  - can be nested
-`
+var geoData = `
+- name: Москва
+  statements:
+    - город
+    - река
+    - столица
+    - столица России
+    - город в России
+    - город в России c 10 млн. жителей
+- name: Берлин
+  statements:
+    - город
+    - город в Германии
+    - столица
+    - столица Германии
+- name: Россия
+  statements:
+    - страна
+- name: Лена
+  statements:
+    - река
+- name: Волга
+  statements:
+    - река
+- name: Волгоград
+  statements:
+    - город
+    - город в России
+  `
 
 func main() {
 	var facts fact.Facts
 
 	// Парсим факты
-	facts.Parse([]byte(abap))
+	facts.Parse([]byte(geoData))
 
 	p := generator.DefaultParameters
 	p.SetCardParameters(card.AikenParameters)

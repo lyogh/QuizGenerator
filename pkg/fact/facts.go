@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/lyogh/QuizGenerator/internal/slice"
 	"gopkg.in/yaml.v2"
 )
 
@@ -58,4 +59,12 @@ func (f *Facts) Parse(data []byte) error {
 	}
 
 	return nil
+}
+
+/*
+Удаляет факт
+*/
+func (f *Facts) Delete(i int) {
+	copy((*f)[i:], (*f)[i+1:])
+	slice.Shrink(f, len(*f)-1)
 }

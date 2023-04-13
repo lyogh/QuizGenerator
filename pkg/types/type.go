@@ -11,3 +11,10 @@ type IdGetter interface {
 type Shuffler interface {
 	Shuffle()
 }
+
+/*
+Интерфейс удаления элемента из коллеции
+*/
+type Deleter interface {
+	Delete(i int)
+}

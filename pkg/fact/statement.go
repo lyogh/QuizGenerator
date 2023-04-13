@@ -1,9 +1,6 @@
 package fact
 
-type (
-	Statement  string
-	Statements []*Statement
-)
+type Statement string
 
 /*
 Создает новый объект - утверждение

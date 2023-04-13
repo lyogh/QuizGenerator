@@ -36,8 +36,8 @@ func (f *Fact) Object() string {
 /*
 Возвращает правдивые факты об объекте
 */
-func (f *Fact) Statements() Statements {
-	return f.statements
+func (f *Fact) Statements() *Statements {
+	return &f.statements
 }
 
 /*

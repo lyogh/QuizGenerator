@@ -17,6 +17,7 @@ var geoData = `
     - столица
     - столица России
     - город в России
+    - город в России c 10 млн. жителей
 - name: Берлин
   statements:
     - город
@@ -36,7 +37,7 @@ var geoData = `
   statements:
     - город
     - город в России
-`
+  `
 
 func main() {
 	var facts fact.Facts

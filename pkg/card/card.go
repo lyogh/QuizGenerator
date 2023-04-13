@@ -1,12 +1,9 @@
 package card
 
 import (
-	"errors"
-	"fmt"
 	"math/rand"
 
 	"github.com/lyogh/QuizGenerator/internal/slice"
-	"github.com/lyogh/QuizGenerator/pkg/fact"
 	"github.com/lyogh/QuizGenerator/pkg/option"
 	"github.com/lyogh/QuizGenerator/pkg/types"
 	"golang.org/x/exp/slices"
@@ -54,7 +51,7 @@ type Card interface {
 	Question() string
 	CardType() CardType
 	Answers() option.Options
-	GenerateOptionsByFacts(facts fact.Facts, distractors fact.Facts, params Parameters) error
+	GroupOptions()
 }
 
 func NewCard(question string, ctype CardType) (Card, error) {
@@ -75,97 +72,19 @@ func (c *card) Id() uint {
 }
 
 /*
-Создает варианты ответов в карточке вопроса на основе фактов и дистракторов
-*/
-func (c *card) GenerateOptionsByFacts(facts, distractors fact.Facts, params Parameters) (err error) {
-	// Добавляем правильные варианты выбора
-	c.options, err = c.randomOptions(facts, *params.Options(), true)
-	if err != nil {
-		return err
-	}
-
-	/*	if uint(len(c.options)) < params.options.GetMax() && rand.Intn(2) == 0 {
-		// Объединим несколько вариантов в один
-		c.addOptionsMix()
-	} else {*/
-	// Ограничиваем список правильных ответов по максимально допустимому количеству
-	if uint(len(c.options)) > params.answers.max {
-		c.options = c.options[:params.answers.max]
-	}
-
-	// Добавим дистракторы
-	c.addDistractors(distractors, params)
-	//}
-
-	c.options.Shuffle()
-
-	return nil
-}
-
-func (c *card) addDistractors(distractors fact.Facts, params Parameters) error {
-	disInt := NewInterval(0, params.options.max)
-
-	if params.answers.max == 1 {
-		// Если максимальное количество правильных ответов = 1, тогда должен быть минимум 1 дистрактор
-		disInt.SetMin(1)
-	}
-
-	// Дистракторы
-	dis, err := c.randomOptions(distractors, *disInt, false)
-	if err != nil {
-		return err
-	}
-
-	if len(dis) == 0 {
-		return errors.New("не определены дистракторы")
-	}
-
-	c.options = append(c.options, dis...)
-
-	// Если количество вариантов ответов превышает допустимое, тогда удаляем лишние
-	if uint(len(c.options)) > params.options.GetMax() {
-		c.options = c.options[:params.options.GetMax()]
-	}
-
-	if uint(len(c.options)) < params.options.GetMax() {
-		/* Добавляем вариант ответа для группировки других вариантов.
-		   - есть такие:
-				1. Ответ A
-				2. Ответ B
-		   - а добавим новый:
-				3. Варианты 1 и 2 правильные
-		*/
-		if rand.Intn(2) == 0 {
-			c.addOptionsMix()
-		}
-	}
-
-	return nil
-}
-
-/*
 Добавляет вариант для группы ответов
 */
-func (c *card) addOptionsMix() {
+func (c *card) GroupOptions() {
 	var (
 		correct, all bool
 	)
 
-	c.options.Shuffle()
+	c.Options().Shuffle()
 
-	olen := len(c.options)
-
-	if len(c.options) > MinOptions {
-		olen = rand.Intn(olen-MinOptions) + MinOptions
-	}
+	olen := rand.Intn(len(c.options)-MinOptions) + MinOptions
 
 	options := make(option.Options, olen)
-
-	for i, o := range c.options {
-		if i < len(options) {
-			options[i] = o
-		}
-	}
+	copy(options, c.options)
 
 	answers := c.Answers()
 
@@ -182,52 +101,7 @@ func (c *card) addOptionsMix() {
 		all = true
 	}
 
-	c.options = append(c.options, option.NewMixedOption(options, correct, all))
-}
-
-func (c *card) randomOptions(facts fact.Facts, interval Interval, correctAnswer bool) (option.Options, error) {
-	var ol int
-
-	if uint(len(facts)) < interval.GetMin() {
-		return nil, errors.New("недостаточно данных для генерации вариантов ответов")
-	}
-
-	facts = slices.Clone(facts)
-
-	if interval.GetMax() > uint(len(facts)) {
-		interval.SetMax(uint(len(facts)))
-	}
-
-	d := interval.GetMax() - interval.GetMin()
-	if d > 0 {
-		ol = rand.Intn(int(d))
-	}
-
-	ol += int(interval.GetMin())
-
-	options := make(option.Options, ol)
-
-	for i := 0; i < len(options); i++ {
-		mr := ol
-		if mr > len(facts) {
-			mr = len(facts)
-		}
-
-		if mr == 0 {
-			break
-		}
-
-		fi := rand.Intn(mr)
-		fact := facts[fi]
-		facts[fi] = nil
-
-		facts = append(facts[:fi], facts[fi+1:]...)
-
-		stms := fact.Statements()
-		options[i] = option.NewOption(fmt.Sprintf("%s - %s", fact.Object(), stms[rand.Intn(len(stms))]), correctAnswer)
-	}
-
-	return options, nil
+	c.AddOption(option.NewMixedOption(options, correct, all))
 }
 
 /*

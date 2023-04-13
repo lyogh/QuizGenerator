@@ -6,6 +6,7 @@ import (
 
 	"github.com/lyogh/QuizGenerator/pkg/card"
 	"github.com/lyogh/QuizGenerator/pkg/fact"
+	"github.com/lyogh/QuizGenerator/pkg/falsifier"
 	"golang.org/x/exp/slices"
 )
 
@@ -32,6 +33,8 @@ type generator struct {
 	distractors fact.Facts
 	// Параметры генератора
 	parameters *Parameters
+	// Фальсификаторы фактов
+	falsifiers falsifier.Falsifiers
 }
 
 /*
@@ -40,6 +43,10 @@ type generator struct {
 func NewGenerator(params *Parameters) Generator {
 	g := &generator{
 		parameters: params,
+		falsifiers: falsifier.Falsifiers{
+			falsifier.NewNumericFalsifier(),
+			falsifier.NewStatementsShuffler(),
+		},
 	}
 
 	if g.parameters == nil {
@@ -89,35 +96,6 @@ func (g *generator) Cards() card.Cards {
 }
 
 /*
-Автоматически создает дистракторы на основе фактов
-*/
-func (g *generator) createDistractors() {
-	// Все возможные утверждения
-	smap := make(map[fact.Statement]struct{})
-
-	for _, f := range g.facts {
-		// Собираем утверждения
-		for _, stm := range f.Statements() {
-			smap[*stm] = struct{}{}
-		}
-	}
-
-	// Создаем дистракторы на основе фактов
-	for _, f := range g.facts {
-		stms := make(fact.Statements, 0, len(smap)-len(f.Statements()))
-
-		// Добавляем ложные утверждения для обрабатываемого объекта
-		for stm := range smap {
-			if !f.HasStatement(stm) {
-				stms = append(stms, fact.NewStatement(string(stm)))
-			}
-		}
-
-		g.AddDistractors(fact.Facts{fact.NewFact(f.Object(), stms)})
-	}
-}
-
-/*
 Создает карточки вопросов
 */
 func (g *generator) CreateCards() error {
@@ -126,7 +104,10 @@ func (g *generator) CreateCards() error {
 		mu sync.Mutex
 	)
 
-	g.createDistractors()
+	distractors, err := g.Falsify(g.facts)
+	if err != nil {
+		return err
+	}
 
 	maxCardsOfType := g.parameters.CardsMax()/uint(len(g.parameters.Types())) + g.parameters.CardsMax()%uint(len(g.parameters.Types()))
 
@@ -134,7 +115,7 @@ func (g *generator) CreateCards() error {
 		defer wg.Done()
 
 		gen.AddFacts(g.facts)
-		gen.AddDistractors(g.distractors)
+		gen.AddDistractors(distractors)
 
 		if err := gen.CreateCards(); err != nil {
 			log.Println(err)
@@ -180,4 +161,22 @@ func (g *generator) Shuffle() {
 	if len(g.cards) > int(g.parameters.CardsMax()) {
 		g.cards = g.cards[:g.parameters.CardsMax()]
 	}
+}
+
+/*
+Фальсифицирует факты
+*/
+func (g *generator) Falsify(facts fact.Facts) (fact.Facts, error) {
+	var lies fact.Facts
+
+	for _, f := range g.falsifiers {
+		dis, err := f.Falsify(facts)
+		if err != nil {
+			return nil, err
+		}
+
+		lies = append(lies, dis...)
+	}
+
+	return lies, nil
 }

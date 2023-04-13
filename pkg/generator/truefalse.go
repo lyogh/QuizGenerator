@@ -32,7 +32,7 @@ func (g *trueFalseGenerator) CreateCards() error {
 			break
 		}
 
-		for _, stm := range fact.Statements() {
+		for _, stm := range *fact.Statements() {
 			if err := g.addCard(fact, *stm, true); err != nil {
 				return err
 			}
@@ -45,12 +45,14 @@ func (g *trueFalseGenerator) CreateCards() error {
 			break
 		}
 
-		for _, stm := range dis.Statements() {
+		for _, stm := range *dis.Statements() {
 			if err := g.addCard(dis, *stm, false); err != nil {
 				return err
 			}
 		}
 	}
+
+	g.Shuffle()
 
 	return nil
 }
