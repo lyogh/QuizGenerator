@@ -57,6 +57,7 @@ func (f *numericFalsifier) falsifyStatement(stm fact.Statement) (*fact.Statement
 	idx := f.rx.FindAllStringIndex(s, -1)
 
 	if len(idx) == 0 {
+		// Не нашли числовых значений в утверждении
 		return nil, ErrNotChanged
 	}
 
@@ -72,9 +73,9 @@ func (f *numericFalsifier) falsifyStatement(stm fact.Statement) (*fact.Statement
 
 		// Увеличиваем или уменьшаем значение
 		if rand.Intn(2) == 1 {
-			new -= rand.Intn(old)
+			new -= rand.Intn(old + 1)
 		} else {
-			new += rand.Intn(old)
+			new += rand.Intn(old + 1)
 		}
 
 		repl[i] = append(repl[i], []int{old, new}...)
