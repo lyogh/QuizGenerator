@@ -27,20 +27,20 @@ func NewTrueFalseGenerator(params *Parameters) Generator {
 
 func (g *trueFalseGenerator) CreateCards() error {
 	// Верные утверждения
-	for i, fact := range g.facts {
+	for i, f := range *g.groups.Data()[fact.RootKey].Facts() {
 		if i > int(g.parameters.CardsMax()) {
 			break
 		}
 
-		for _, stm := range *fact.Statements() {
-			if err := g.addCard(fact, *stm, true); err != nil {
+		for _, stm := range *f.Statements() {
+			if err := g.addCard(f, *stm, true); err != nil {
 				return err
 			}
 		}
 	}
 
 	// Ошибочные утверждения
-	for i, dis := range g.distractors {
+	for i, dis := range *g.groups.Data()[fact.RootKey].Lies() {
 		if i > int(g.parameters.CardsMax()) {
 			break
 		}
@@ -67,7 +67,7 @@ func (g *trueFalseGenerator) addCard(f *fact.Fact, stm fact.Statement, answer bo
 	c.AddOption(option.NewOption(card.AnswerYes, answer))
 	c.AddOption(option.NewOption(card.AnswerNo, !answer))
 
-	c.Options().Shuffle()
+	c.Options().Beautify()
 
 	g.cards = append(g.cards, c)
 

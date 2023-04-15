@@ -1,0 +1,23 @@
+# SAP ABAP facts
+---
+# ABAP Tools Block
+- ABAP Tools:
+  - The Object Navigator:
+    - incorporates a total of 11 browsers
+    - can display and edit ABAP programs
+    - can display and edit screens
+    - can display and edit menus
+    - can maintain ABAP Dictionary
+  - The Repository Browser:
+    - is started by default when you execute Transaction SE80 for the Object Navigator
+  - The Repository Information System:
+      - is a useful tool to search for customer exits/function exits and BAdIs in the SAP system
+  - Enhancement Information System:
+      - can display Enhancement definitions and implementations
+# Package Block
+- Package:
+  - Customer repository object:
+    - have to be assigned to a package
+  - Package:
+    - use interfaces and visibility to make their elements visible to other packages
+    - can be nested

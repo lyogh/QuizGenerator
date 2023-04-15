@@ -26,8 +26,7 @@ func NewApp() *app {
 */
 func (a *app) start() {
 	var (
-		facts fact.Facts
-		err   error
+		err error
 	)
 
 	a.fs, err = NewFlagSet()
@@ -44,13 +43,15 @@ func (a *app) start() {
 	// Новый генератор
 	a.g = generator.NewGenerator(generator.DefaultParameters)
 
+	facts := fact.NewGroups()
+
 	// Импортируем факты из файла
 	if err := facts.Import(a.fs.dataFile); err != nil {
 		log.Fatal(err)
 	}
 
 	// Добавляем факты в генератор
-	a.g.AddFacts(facts)
+	a.g.SetFacts(facts)
 
 	// Генерируем карточки вопросов
 	if err := a.g.CreateCards(); err != nil {

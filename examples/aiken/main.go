@@ -11,40 +11,38 @@ import (
 )
 
 var geoData = `
-- name: Москва
-  statements:
+# Географические факты
+---
+- Все факты:
+  - Москва:
     - город
     - река
     - столица
     - столица России
     - город в России
     - город в России c 10 млн. жителей
-- name: Берлин
-  statements:
+  - Берлин:
     - город
     - город в Германии
     - столица
     - столица Германии
-- name: Россия
-  statements:
+  - Россия:
     - страна
-- name: Лена
-  statements:
+  - Лена:
     - река
-- name: Волга
-  statements:
+  - Волга:
     - река
-- name: Волгоград
-  statements:
+  - Волгоград:
     - город
-    - город в России
-  `
+    - город в России`
 
 func main() {
-	var facts fact.Facts
+	facts := fact.NewGroups()
 
 	// Парсим факты
-	facts.Parse([]byte(geoData))
+	if err := facts.Parse([]byte(geoData)); err != nil {
+		log.Fatal(err)
+	}
 
 	p := generator.DefaultParameters
 	p.SetCardParameters(card.AikenParameters)
@@ -53,7 +51,7 @@ func main() {
 	g := generator.NewGenerator(p)
 
 	// Добавляем факты в генератор
-	g.AddFacts(facts)
+	g.SetFacts(facts)
 
 	// Создаем карточки вопросов
 	if err := g.CreateCards(); err != nil {

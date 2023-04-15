@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 
@@ -10,11 +11,14 @@ import (
 	"github.com/lyogh/QuizGenerator/pkg/option"
 )
 
+// Генератор карточек вопросов с множеством вариантов ответов
 type multipleChoiceCard struct {
 	generator
 
 	stmsMap map[*fact.Statements]*fact.Statements
 }
+
+var ErrNoMoreLies = errors.New("не определены дистракторы")
 
 /*
 Создает новый объект генератора карточек множественного выбора
@@ -29,14 +33,19 @@ func NewMultipleChoiceCard(parameters *Parameters) Generator {
 	}
 }
 
+/*
+Генерирует карточки вопросов теста
+*/
 func (g *multipleChoiceCard) CreateCards() error {
-	slice.Shuffle(g.facts)
-	slice.Shuffle(g.distractors)
+	facts := g.groups.Data()[fact.RootKey].Facts()
+
+	slice.Shuffle(*facts)
+	slice.Shuffle(*g.groups.Data()[fact.RootKey].Lies())
 
 	g.stmsMap = make(map[*fact.Statements]*fact.Statements)
 
-	for i := 0; i < int(g.parameters.CardsMax()) && len(g.facts) > 0; i++ {
-		if err := g.addCard(); err != nil {
+	for i := 0; i < int(g.parameters.CardsMax()) && len(*facts) > 0; i++ {
+		if err := g.addCard(); err != nil && err != ErrNoMoreLies {
 			return err
 		}
 	}
@@ -46,7 +55,12 @@ func (g *multipleChoiceCard) CreateCards() error {
 	return nil
 }
 
+/*
+Создает карточку вопроса
+*/
 func (g *multipleChoiceCard) addCard() error {
+	facts := g.groups.Data()[fact.RootKey].Facts()
+	lies := g.groups.Data()[fact.RootKey].Lies()
 
 	c, err := card.NewCard(card.QuestionTextChooseStatements, card.TypeMultipleChoice)
 	if err != nil {
@@ -63,12 +77,17 @@ func (g *multipleChoiceCard) addCard() error {
 	}
 
 	// Добавляем правильные ответы
-	for i := 0; i < alen && len(g.facts) > 0; i++ {
-		g.addOptions(c, &g.facts, true)
+	for i := 0; i < alen && len(*facts) > 0; i++ {
+		g.addOptions(c, facts, true)
 	}
 
-	for i := len(c.Answers()); i < olen && len(g.distractors) > 0; i++ {
-		g.addOptions(c, &g.distractors, false)
+	// В карточке не может быть только один вариант ответа
+	if len(*lies) == 0 && len(c.Answers()) == 1 {
+		return ErrNoMoreLies
+	}
+
+	for i := len(c.Answers()); i < olen && len(*lies) > 0; i++ {
+		g.addOptions(c, lies, false)
 	}
 
 	if rand.Intn(2) == 0 && len(c.Options()) > card.MinOptions {

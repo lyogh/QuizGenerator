@@ -12,11 +12,14 @@ type Options []Option
 var _ types.Shuffler = (Options)(nil)
 
 func (o Options) Shuffle() {
+	slice.Shuffle(o)
+	o.Beautify()
+}
+
+func (o Options) Beautify() {
 	const (
 		first = 65
 	)
-
-	slice.Shuffle(o)
 
 	for i, opt := range o {
 		opt.SetId(uint(i + 1))
