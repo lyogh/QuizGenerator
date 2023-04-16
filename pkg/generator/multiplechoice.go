@@ -59,10 +59,19 @@ func (g *multipleChoiceCard) CreateCards() error {
 Создает карточку вопроса
 */
 func (g *multipleChoiceCard) addCard() error {
-	facts := g.groups.Data()[fact.RootKey].Facts()
-	lies := g.groups.Data()[fact.RootKey].Lies()
+	var (
+		facts, lies *fact.Facts
+		q           string
+	)
 
-	c, err := card.NewCard(card.QuestionTextChooseStatements, card.TypeMultipleChoice)
+	// Случайно выбираем вопрос "Выберите верные утверждения" или "Выберите НЕ верные утверждения"
+	if rand.Intn(2) == 0 {
+		facts, lies, q = g.groups.Data()[fact.RootKey].Facts(), g.groups.Data()[fact.RootKey].Lies(), card.QuestionTextChooseCorrectStatements
+	} else {
+		facts, lies, q = g.groups.Data()[fact.RootKey].Lies(), g.groups.Data()[fact.RootKey].Facts(), card.QuestionTextChooseWrongStatements
+	}
+
+	c, err := card.NewCard(q, card.TypeMultipleChoice)
 	if err != nil {
 		return err
 	}
@@ -91,8 +100,8 @@ func (g *multipleChoiceCard) addCard() error {
 	}
 
 	if rand.Intn(2) == 0 && len(c.Options()) > card.MinOptions {
-		// Группируемы ответы
-		c.GroupOptions()
+		// Группируем ответы
+		//c.GroupOptions()
 	}
 
 	c.Options().Shuffle()

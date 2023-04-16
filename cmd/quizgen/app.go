@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/lyogh/QuizGenerator/pkg/card"
 	enc "github.com/lyogh/QuizGenerator/pkg/encoding"
 	"github.com/lyogh/QuizGenerator/pkg/encoding/aiken"
 	"github.com/lyogh/QuizGenerator/pkg/encoding/gift"
@@ -36,12 +37,23 @@ func (a *app) start() {
 
 	a.fs.parse()
 
-	p := generator.DefaultParameters
+	p := *generator.DefaultParameters
 
+	// Максимальное количество карточек в тесте
 	p.SetCardsMax(a.fs.cardsMax)
 
+	// Типы карточек
+	ct := make(card.CardTypes, 0)
+	for t, tb := range a.fs.cardTypes {
+		if tb {
+			ct = append(ct, card.CardType(t))
+		}
+	}
+
+	p.SetTypes(ct)
+
 	// Новый генератор
-	a.g = generator.NewGenerator(generator.DefaultParameters)
+	a.g = generator.NewGenerator(&p)
 
 	facts := fact.NewGroups()
 
@@ -101,25 +113,26 @@ func (a *app) export() error {
 Запускает тестирование
 */
 func (a *app) test() error {
-	var result float32
+	var result card.CardResult
 
 	// Начинаем тестирование
 	t := NewTerminal()
 
 	for _, c := range a.g.Cards() {
-		res, err := t.renderCard(c)
+		err := t.renderCard(c)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		result += res
+		result.Value += c.Result().Value
+		result.Duration += c.Result().Duration
 	}
 
-	result = result / float32(len(a.g.Cards()))
+	result.Value = result.Value / float32(len(a.g.Cards()))
 
 	color := ColorIncomplete
 
-	switch result {
+	switch result.Value {
 	case 0:
 		color = ColorNegative
 	case 1:
@@ -127,7 +140,9 @@ func (a *app) test() error {
 	}
 
 	fmt.Print("\n")
-	t.print(color, fmt.Sprintf("Общий результат: %.2f%%", result*100))
+	t.print(color, fmt.Sprintf("Общий результат: %.2f%%", result.Value*100))
+	fmt.Print("\n")
+	t.print(color, fmt.Sprintf("Общее время: %.2fс", result.Duration.Seconds()))
 	fmt.Print("\n")
 
 	return nil

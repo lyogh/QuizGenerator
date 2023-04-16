@@ -2,6 +2,7 @@ package card
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/lyogh/QuizGenerator/internal/slice"
 	"github.com/lyogh/QuizGenerator/pkg/option"
@@ -15,8 +16,9 @@ const (
 )
 
 const (
-	QuestionTextStatementCorrect = "Верно ли утверждение"
-	QuestionTextChooseStatements = "Выберите верные утверждения"
+	QuestionTextStatementCorrect        = "Верно ли утверждение"
+	QuestionTextChooseCorrectStatements = "Выберите верные утверждения"
+	QuestionTextChooseWrongStatements   = "Выберите неверные утверждения"
 )
 
 const (
@@ -31,6 +33,13 @@ type (
 	CardTypes []CardType
 )
 
+type CardResult struct {
+	// Оценка ответа
+	Value float32
+	// Длительность ответа
+	Duration time.Duration
+}
+
 type card struct {
 	// Ид вопроса
 	id uint
@@ -39,7 +48,8 @@ type card struct {
 	// Варианты ответов
 	options option.Options
 	// Тип карточки
-	ctype CardType
+	ctype  CardType
+	result CardResult
 }
 
 // Карточка вопроса
@@ -52,6 +62,10 @@ type Card interface {
 	CardType() CardType
 	Answers() option.Options
 	GroupOptions()
+
+	// Оценка ответа пользователя
+	SetResult(CardResult)
+	Result() CardResult
 }
 
 func NewCard(question string, ctype CardType) (Card, error) {
@@ -142,4 +156,18 @@ func (c *card) Answers() option.Options {
 	}
 
 	return options[:i]
+}
+
+/*
+Определяет оценку ответа пользователя
+*/
+func (c *card) SetResult(result CardResult) {
+	c.result = result
+}
+
+/*
+Возвращает оценку ответа пользователя
+*/
+func (c *card) Result() CardResult {
+	return c.result
 }

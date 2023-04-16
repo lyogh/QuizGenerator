@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/lyogh/QuizGenerator/pkg/card"
@@ -31,7 +32,7 @@ func NewTerminal() *terminal {
 /*
 Выводит карточку вопроса и ожидает ответ от пользователя
 */
-func (t *terminal) renderCard(c card.Card) (float32, error) {
+func (t *terminal) renderCard(c card.Card) error {
 	var (
 		correct int
 	)
@@ -110,6 +111,8 @@ func (t *terminal) renderCard(c card.Card) (float32, error) {
 		return correct, nil
 	}
 
+	tstart := time.Now()
+
 	for {
 		var err error
 
@@ -123,21 +126,28 @@ func (t *terminal) renderCard(c card.Card) (float32, error) {
 		break
 	}
 
-	result := float32(correct) / float32(len(answers))
+	result := card.CardResult{
+		Value:    float32(correct) / float32(len(answers)),
+		Duration: time.Since(tstart),
+	}
+
+	c.SetResult(result)
 
 	color := ColorIncomplete
 
-	switch result {
+	switch result.Value {
 	case 0:
 		color = ColorNegative
 	case 1:
 		color = ColorPositive
 	}
 
-	t.print(color, fmt.Sprintf("Результат: %.2f (%d/%d)", result*100, correct, len(answers)))
+	t.print(color, fmt.Sprintf("Результат: %.2f%% (%d/%d)", result.Value*100, correct, len(answers)))
+	fmt.Print("\n")
+	t.print(color, fmt.Sprintf("Время: %.2fс", result.Duration.Seconds()))
 	fmt.Print("\n")
 
-	return result, nil
+	return nil
 }
 
 /*

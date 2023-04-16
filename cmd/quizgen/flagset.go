@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/lyogh/QuizGenerator/pkg/card"
 	enc "github.com/lyogh/QuizGenerator/pkg/encoding"
 	"github.com/lyogh/QuizGenerator/pkg/generator"
 )
@@ -12,10 +13,11 @@ import (
 type flagSet struct {
 	*flag.FlagSet
 
-	cardsMax uint            // Макисмальное количество вопросов в тесте
-	encType  enc.EncoderType // Формат файла выгрузки
-	dataFile string          // Файл с описанием фактов
-	outFile  string          // Файл выгрузки тестовых вопросов
+	cardsMax  uint            // Макисмальное количество вопросов в тесте
+	encType   enc.EncoderType // Формат файла выгрузки
+	dataFile  string          // Файл с описанием фактов
+	outFile   string          // Файл выгрузки тестовых вопросов
+	cardTypes [2]bool         // Типы карточек
 }
 
 func NewFlagSet() (*flagSet, error) {
@@ -24,6 +26,10 @@ func NewFlagSet() (*flagSet, error) {
 
 	fs.UintVar(&fs.cardsMax, "c", generator.DefaultParameters.CardsMax(), "максимальное количество вопросов в тесте")
 	fs.TextVar(&fs.encType, "f", enc.EncoderTypeAiken, "формат выгрузки теста (Aiken, GIFT)")
+
+	// Типы карточек
+	fs.BoolVar(&fs.cardTypes[card.TypeTrueFalse], "ttf", true, "разрешить тип карточки Да/Нет")
+	fs.BoolVar(&fs.cardTypes[card.TypeMultipleChoice], "tmc", true, "разрешить тип карточки множественного выбора")
 
 	return fs, nil
 }
